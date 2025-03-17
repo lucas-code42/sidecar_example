@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
 )
 
 type Request struct {
@@ -32,7 +33,7 @@ func encodeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := Response{Encoded: string(output)}
+	res := Response{Encoded: strings.TrimSpace(string(output))}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(res)
 }
