@@ -83,10 +83,20 @@ spec:
 ```
 
 ### 🔍 Explicação:
-- **Criamos um volume `shared-bin`** para compartilhar arquivos entre os contêineres.
-- **A API principal (`base64-http`) monta esse volume** para acessar o binário do Sidecar.
-- **O Sidecar copia seu binário para o volume e o torna executável.**
-- **O `tail -f /dev/null` impede que o Sidecar morra e entre em CrashLoopBackOff**, garantindo que o binário sempre esteja disponível.
+- **Volumes e VolumeMounts:**
+  - Criamos um volume chamado `shared-bin` com `emptyDir: {}`. Isso significa que esse volume será um diretório compartilhado entre os contêineres do Pod e existirá **somente enquanto o Pod estiver rodando**.
+  - O volume é montado em **ambos os contêineres** (`base64-http` e `sidecar`) no caminho `/shared-bin`, permitindo que o binário gerado pelo Sidecar fique acessível para a aplicação principal.
+
+- **`imagePullPolicy: Never`** → Esse campo instrui o Kubernetes a **não tentar puxar a imagem do registro (como Docker Hub)**, pois estamos usando imagens locais no Minikube. Se esse campo não estivesse definido, o Kubernetes tentaria baixar a imagem, o que poderia causar falhas se a imagem não estivesse publicada em um repositório.
+
+- **O `sidecar` copia seu binário para o volume compartilhado** → O comando:
+  ```sh
+  cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && tail -f /dev/null
+  ```
+  faz três coisas:
+  1. Copia o binário `/sidecar` para o volume compartilhado (`/shared-bin/sidecar`).
+  2. Dá permissão de execução (`chmod +x`) para que a aplicação principal possa rodá-lo.
+  3. Mantém o contêiner vivo com `tail -f /dev/null`, evitando que ele seja finalizado e entre em estado de CrashLoopBackOff.
 
 ---
 
