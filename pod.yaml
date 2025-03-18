@@ -8,8 +8,8 @@ spec:
       emptyDir: {}
 
   containers:
-    - name: base64-cli
-      image: base64-cli:latest
+    - name: base64-http
+      image: base64-http:latest
       imagePullPolicy: Never
       ports:
         - containerPort: 8080
@@ -23,4 +23,4 @@ spec:
       volumeMounts:
         - mountPath: /shared-bin
           name: shared-bin
-      command: ["/bin/sh", "-c", "cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && sleep infinity"]
+      command: ["/bin/sh", "-c", "cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && tail -f /dev/null"]
