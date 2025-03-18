@@ -219,11 +219,48 @@ CMD ["/sidecar"]
 
 O **Minikube** é uma ferramenta que permite rodar um cluster Kubernetes localmente. Ele simula um ambiente real, perfeito para testes antes de enviar para produção.
 
+## 🔹 Makefile
+```makefile
+APP_IMAGE=base64-http:latest
+SIDECAR_IMAGE=sidecar:latest
+
+up:
+	minikube start
+	minikube image load $(SIDECAR_IMAGE)
+	minikube image load $(APP_IMAGE)
+	kubectl apply -f pod.yaml
+
+build:
+	docker build -t $(APP_IMAGE) .
+	docker build -t $(SIDECAR_IMAGE) ./sidecar/.
+
+restart:
+	kubectl delete pod base64-pod --ignore-not-found
+	kubectl apply -f pod.yaml
+
+logs:
+	kubectl logs base64-pod -c base64-http
+	kubectl logs base64-pod -c sidecar
+
+status:
+	kubectl get pods
+
+
+port-forward:
+	kubectl port-forward base64-pod 8080:8080
+
+clean:
+	kubectl delete pod base64-pod --ignore-not-found
+	minikube delete
+	docker rmi $(APP_IMAGE) $(SIDECAR_IMAGE) --force
+
+
+```
+
 ### **Passos para rodar no Minikube**
 ```sh
-make up            # Inicia o Minikube, carrega as imagens docker no minikube e aplica o Pod
 make build         # Constrói as imagens docker
-make restart       # Reinicia o Pod
+make up            # Inicia o Minikube, carrega as imagens docker no minikube e aplica o Pod
 make port-forward  # Conecta uma porta do pod com uma porta da máquina local
 ```
 
