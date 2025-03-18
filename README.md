@@ -41,9 +41,9 @@ Um **Sidecar** é um contêiner auxiliar que roda dentro do mesmo Pod que a apli
 
 O nosso exemplo usa um Sidecar como um binário executável, mas esse não é o único jeito de usá-los! Aqui estão outras aplicações comuns:
 
-- **Proxy reverso (Ex: Istio Envoy)** → Gerencia tráfego entre microserviços.
-- **Coleta de logs (Ex: Fluentd)** → Envia logs da aplicação para um sistema central.
-- **Armazenamento de segredos (Ex: Vault)** → Gerencia credenciais sem expô-las diretamente à aplicação.
+- **Proxy reverso** → Gerencia tráfego entre microserviços.
+- **Coleta de logs** → Envia logs da aplicação para um sistema central.
+- **Armazenamento de secrets** → Gerencia credenciais sem expô-las diretamente à aplicação.
 
 Cada caso de uso pode exigir uma abordagem diferente!
 
@@ -91,7 +91,7 @@ spec:
 
 - **O `sidecar` copia seu binário para o volume compartilhado** → O comando:
   ```sh
-  cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && tail -f /dev/null
+  command: ["/bin/sh", "-c", "cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && tail -f /dev/null"]
   ```
   faz três coisas:
   1. Copia o binário `/sidecar` para o volume compartilhado (`/shared-bin/sidecar`).
@@ -224,7 +224,7 @@ O **Minikube** é uma ferramenta que permite rodar um cluster Kubernetes localme
 make up            # Inicia o Minikube, carrega as imagens docker no minikube e aplica o Pod
 make build         # Constrói as imagens docker
 make restart       # Reinicia o Pod
-make port-forward  # Encaminha a porta para teste local
+make port-forward  # Conecta uma porta do pod com uma porta da máquina local
 ```
 
 Agora podemos testar com:
