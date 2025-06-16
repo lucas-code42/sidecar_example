@@ -1,10 +1,10 @@
-# Como rodar um Sidecar no Kubernetes: Um guia prático 🚀
+# Sidecar no Kubernetes: Um guia prático
 
-Se você está começando com Kubernetes e já ouviu falar em **Sidecar Containers**, mas ainda não entendeu direito como funciona na prática, esse artigo é para você! Vamos criar um exemplo simples e direto ao ponto para ilustrar o conceito. 💡
+Nesse artigo vamos implementar na prática o conceito de **Sidecar Containers** usando Kubernetes
 
 ---
 
-## 🔹 O que é Kubernetes?
+## Intro Kubernetes
 
 Kubernetes (ou **k8s**) é um sistema que ajuda a gerenciar aplicações em contêineres de forma automatizada. Ele lida com a **implantação**, **escalabilidade** e **execução** dos contêineres, sem que você precise se preocupar com servidores manualmente.
 
@@ -12,7 +12,7 @@ Se você já usou Docker, sabe que ele roda um contêiner isolado. Mas e quando 
 
 ---
 
-## 🔹 O que é um Pod no Kubernetes?
+## Intro Pod
 
 No Kubernetes, um **Pod** é a menor unidade que pode ser implantada. Ele pode conter um ou mais contêineres que:
 
@@ -24,11 +24,11 @@ Pensa no Pod como um **mini-servidor** que agrupa processos que precisam rodar j
 
 ---
 
-## 🔹 O que é um Sidecar Container?
+## Intro Sidecar Container
 
 Um **Sidecar** é um contêiner auxiliar que roda dentro do mesmo Pod que a aplicação principal, ajudando com alguma funcionalidade extra. Em nosso caso, ele fará a conversão de strings para **Base64**.
 
-📌 **Nosso exemplo:**
+📌 **exemplo:**
 1. Criamos um Pod com **dois contêineres**:
    - Um **API (base64-http)** que recebe strings e precisa convertê-las para Base64.
    - Um **Sidecar** que faz essa conversão.
@@ -37,7 +37,7 @@ Um **Sidecar** é um contêiner auxiliar que roda dentro do mesmo Pod que a apli
 
 ---
 
-## 🔹 Outros exemplos de Sidecar
+## Outros exemplos de Sidecar
 
 O nosso exemplo usa um Sidecar como um binário executável, mas esse não é o único jeito de usá-los! Aqui estão outras aplicações comuns:
 
@@ -49,7 +49,7 @@ Cada caso de uso pode exigir uma abordagem diferente!
 
 ---
 
-## 🔹 Como funciona o `pod.yaml`?
+## Como funciona o `pod.yaml`?
 
 O arquivo `pod.yaml` define como o Kubernetes deve criar e gerenciar nosso Pod.
 
@@ -82,7 +82,7 @@ spec:
       command: ["/bin/sh", "-c", "cp /sidecar /shared-bin/sidecar && chmod +x /shared-bin/sidecar && tail -f /dev/null"]
 ```
 
-### 🔍 Explicação:
+### Explicação:
 - **Volumes e VolumeMounts:**
   - Criamos um volume chamado `shared-bin` com `emptyDir: {}`. Isso significa que esse volume será um diretório compartilhado entre os contêineres do Pod e existirá **somente enquanto o Pod estiver rodando**.
   - O volume é montado em **ambos os contêineres** (`base64-http` e `sidecar`) no caminho `/shared-bin`, permitindo que o binário gerado pelo Sidecar fique acessível para a aplicação principal.
@@ -100,7 +100,7 @@ spec:
 
 ---
 
-## 🔹 Código da aplicação principal (`base64-http`)
+## Código da aplicação principal (`base64-http`)
 
 Essa API recebe um JSON com um texto e chama o Sidecar via `exec.Command`.
 
@@ -156,7 +156,7 @@ func main() {
 
 ---
 
-## 🔹 Código do Sidecar
+## Código do Sidecar
 
 O Sidecar é um simples programa CLI que recebe uma string e retorna sua versão codificada em Base64.
 
@@ -183,7 +183,7 @@ func main() {
 
 ---
 
-## 🔹 Dockerfiles
+## Dockerfiles
 
 ### **Aplicação Principal (`base64-http`)**
 ```dockerfile
@@ -215,11 +215,11 @@ CMD ["/sidecar"]
 
 ---
 
-## 🔹 O que é o Minikube e por que usamos?
+## O que é o Minikube e por que usamos?
 
 O **Minikube** é uma ferramenta que permite rodar um cluster Kubernetes localmente. Ele simula um ambiente real, perfeito para testes antes de enviar para produção.
 
-## 🔹 Makefile
+## Makefile
 ```makefile
 APP_IMAGE=base64-http:latest
 SIDECAR_IMAGE=sidecar:latest
@@ -278,7 +278,10 @@ Saída esperada:
 
 ---
 
-## 🔹 Conclusão
+## Conclusão
 
-Neste artigo, vimos como criar e rodar um **Sidecar Container no Kubernetes** usando o Minikube. Esse padrão é muito útil para modularizar aplicações e torná-las mais flexíveis! Agora que você entendeu o conceito, pode experimentar outras abordagens, como transformar o Sidecar em um microserviço HTTP. 🚀
+Neste artigo, vimos na prática como usar o padrão Sidecar Container no Kubernetes para complementar a funcionalidade de uma aplicação principal. Usando dois containers Go rodando no mesmo Pod e compartilhando um volume, mostramos como é possível dividir responsabilidades de forma simples e eficaz.
 
+O padrão Sidecar é uma solução interessante para encapsular funcionalidades auxiliares sem alterar o código ou aplicação principal. 
+
+Esse é um padrão que pode ser levado em conta sempre que houver a necessidade de adicionar lógica complementar à sua aplicação de forma desacoplada, mas ainda próxima o suficiente para compartilhar contexto de execução.
